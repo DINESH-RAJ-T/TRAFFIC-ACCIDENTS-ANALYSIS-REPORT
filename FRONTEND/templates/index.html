@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Accidents Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 80%; margin: auto; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 10px; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <h2>Traffic Accidents Report</h2>
+    <label for="date">Select Date:</label>
+    <input type="date" id="date">
+    <button onclick="fetchAccidents()">Get Report</button>
+
+    <table id="accidentTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Location</th>
+                <th>Weather</th>
+                <th>Cause</th>
+                <th>Vehicles Involved</th>
+                <th>Casualties</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        function fetchAccidents() {
+            let date = document.getElementById("date").value;
+            if (!date) {
+                alert("Please select a date.");
+                return;
+            }
+            fetch("http://127.0.0.1:5000/get_accidents?date=" + date)
+
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("No accidents found for this date");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let table = document.getElementById("accidentTable");
+                    let tbody = table.querySelector("tbody");
+                    tbody.innerHTML = "";
+
+                    data.forEach(accident => {
+                        let row = `<tr>
+                            <td>${accident.id}</td>
+                            <td>${accident.date}</td>
+                            <td>${accident.time}</td>
+                            <td>${accident.location}</td>
+                            <td>${accident.weather}</td>
+                            <td>${accident.cause}</td>
+                            <td>${accident.vehicles_involved}</td>
+                            <td>${accident.casualties}</td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                    table.style.display = "table";
+                })
+                .catch(error => {
+                    alert(error.message);
+                    document.getElementById("accidentTable").style.display = "none";
+                    console.error("Error fetching data:", error);
+                });
+        }
+    </script>
+</body>
+</html>
